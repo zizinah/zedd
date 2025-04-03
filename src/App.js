@@ -60,7 +60,6 @@ function App() {
   const handleSubmit = async () => {
     const allCodes = productRows.filter((r) => r.field2).map((r) => r.field2);
 
-    // 🔧 수정됨: 각 제품에 대해 객체화
     const products = allCodes.map((code) => {
       const val = productResponses[code] || {};
       return {
@@ -100,20 +99,22 @@ function App() {
     <div className="p-6 max-w-4xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">📦 Sourcing Response Form</h1>
 
-      {/* 기본 정보 입력 */}
       <div className="mb-6">
-        {[
-          { label: "Company Name", name: "companyName", type: "text" },
-          { label: "Email", name: "email", type: "email" },
-          { label: "WhatsApp Number (Optional)", name: "whatsapp", type: "text" },
-          { label: "Website (Optional)", name: "website", type: "url" },
-        ].map((field) => (
-          <div key={field.name}>
-            <label className="block mb-2">{field.label}</label>
+        {["companyName", "email", "whatsapp", "website"].map((name) => (
+          <div key={name}>
+            <label className="block mb-2">
+              {name === "companyName"
+                ? "Company Name"
+                : name === "email"
+                ? "Email"
+                : name === "whatsapp"
+                ? "WhatsApp Number (Optional)"
+                : "Website (Optional)"}
+            </label>
             <input
-              type={field.type}
-              name={field.name}
-              value={companyInfo[field.name]}
+              type={name === "email" ? "email" : name === "website" ? "url" : "text"}
+              name={name}
+              value={companyInfo[name]}
               onChange={handleInputChange}
               className="border px-2 py-1 rounded w-full mb-4"
             />
@@ -121,7 +122,6 @@ function App() {
         ))}
       </div>
 
-      {/* 안내 & 체크박스 */}
       {contentBlocks.map((block, idx) => (
         <div key={idx} className="mb-6">
           {block.field4 && (
@@ -145,7 +145,6 @@ function App() {
 
       <hr className="my-8 border-t-2" />
 
-      {/* 제품 리스트 */}
       <h2 className="text-xl font-semibold mb-4">📋 Product List</h2>
       {groupedProducts.map((product, iGroup) => (
         <div key={iGroup} className="border rounded p-4 mb-6 shadow-sm">
@@ -160,28 +159,30 @@ function App() {
           {product.options.map((opt, iOpt) => (
             <div key={iOpt} className="border p-3 rounded mb-2">
               <p className="font-medium mb-1">{opt.field4}</p>
-              <div className="flex gap-4 items-center">
-                <label className="flex items-center">
+              {(product.options.length === 1 || iOpt > 0) && (
+                <div className="flex gap-4 items-center">
+                  <label className="flex items-center">
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={!!productResponses[opt.field2]?.available}
+                      onChange={(e) =>
+                        handleProductChange(opt.field2, "available", e.target.checked)
+                      }
+                    />
+                    Available for Supply
+                  </label>
                   <input
-                    type="checkbox"
-                    className="mr-2"
-                    checked={!!productResponses[opt.field2]?.available}
+                    type="text"
+                    placeholder="Enter price incl. shipping"
+                    value={productResponses[opt.field2]?.price || ""}
                     onChange={(e) =>
-                      handleProductChange(opt.field2, "available", e.target.checked)
+                      handleProductChange(opt.field2, "price", e.target.value)
                     }
+                    className="border px-2 py-1 rounded w-60"
                   />
-                  Available for Supply
-                </label>
-                <input
-                  type="text"
-                  placeholder="Enter price incl. shipping"
-                  value={productResponses[opt.field2]?.price || ""}
-                  onChange={(e) =>
-                    handleProductChange(opt.field2, "price", e.target.value)
-                  }
-                  className="border px-2 py-1 rounded w-60"
-                />
-              </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
@@ -189,7 +190,6 @@ function App() {
 
       <hr className="my-8 border-t-2" />
 
-      {/* 배송 관련 질문 */}
       <div className="mb-6">
         <label className="block mb-2">
           How long does it usually take for your products to be delivered to customers in South Korea?
@@ -203,7 +203,6 @@ function App() {
         />
       </div>
 
-      {/* 추가 가능 제품 */}
       <div className="mb-6">
         <label className="block mb-2">
           If you have other products that can be shipped to Korea, please write them here.
@@ -217,7 +216,6 @@ function App() {
         />
       </div>
 
-      {/* 마지막 메시지 */}
       <div className="mb-6">
         <label className="block mb-2">Do you have any final message you would like to convey?</label>
         <textarea
