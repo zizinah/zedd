@@ -3,7 +3,7 @@ import data from "./data/products.json";
 
 function App() {
   const contentBlocks = data.slice(0, 8);
-  const productRows = data.slice(11);
+  const productRows = data.slice(10);
 
   const [companyInfo, setCompanyInfo] = useState({
     companyName: "",
