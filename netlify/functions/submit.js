@@ -1,6 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 
-exports.handler = async function(event, context) {
+exports.handler = async function (event, context) {
   console.log("🟢 [submit] Received body:", event.body);
 
   try {
@@ -27,7 +27,7 @@ exports.handler = async function(event, context) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['response'];
 
-    await sheet.addRow({
+    const row = {
       Timestamp: new Date().toISOString(),
       Company: companyName,
       Email: email,
@@ -37,21 +37,28 @@ exports.handler = async function(event, context) {
       Delivered: delivered,
       AdditionalProducts: additionalProducts,
       FinalMessage: finalMessage,
-      Confirmations: confirmations.join(', '),
-      Products: products.join(', ')
+      Confirmations: confirmations.join(', ')
+    };
+
+    // 제품 코드별 데이터 추가
+    products.forEach(({ code, available, price }) => {
+      row[`${code} Available`] = available;
+      row[`${code} Price`] = price;
     });
 
-    console.log("✅ [submit] Row added successfully");
+    await sheet.addRow(row);
+
+    console.log("✅ [submit] One row added successfully");
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ success: true })
+      body: JSON.stringify({ success: true }),
     };
   } catch (err) {
     console.error("❌ [submit] Error:", err);
     return {
       statusCode: 500,
-      body: JSON.stringify({ success: false, error: err.message })
+      body: JSON.stringify({ success: false, error: err.message }),
     };
   }
 };
