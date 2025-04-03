@@ -18,6 +18,7 @@ function App() {
 
   const [confirmations, setConfirmations] = useState({});
   const [productResponses, setProductResponses] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const groupedProducts = [];
   let currentGroup = null;
@@ -58,6 +59,7 @@ function App() {
   };
 
   const handleSubmit = async () => {
+    setIsSubmitting(true);
     const allCodes = productRows.filter((r) => r.field2).map((r) => r.field2);
 
     const products = allCodes.map((code) => {
@@ -92,6 +94,8 @@ function App() {
       if (json.success) alert("✅ Response submitted successfully!");
     } catch (e) {
       alert("❌ Submission failed.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -229,9 +233,12 @@ function App() {
 
       <button
         onClick={handleSubmit}
-        className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded"
+        disabled={isSubmitting}
+        className={`${
+          isSubmitting ? "bg-gray-400" : "bg-blue-600 hover:bg-blue-700"
+        } text-white font-semibold px-4 py-2 rounded`}
       >
-        Submit Response
+        {isSubmitting ? "Submitting..." : "Submit Response"}
       </button>
     </div>
   );
