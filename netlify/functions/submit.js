@@ -14,7 +14,8 @@ exports.handler = async function(event, context) {
     });
 
     await doc.loadInfo();
-    const sheet = doc.sheetsByIndex[0];
+    const sheet = doc.sheetsByTitle['response'];
+
 
     await sheet.addRow({ name, answer });
 
