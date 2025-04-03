@@ -46,3 +46,14 @@
     "tailwindcss": "^3.4.17"
   }
 }
+{
+  "name": "zedd_kim",
+  "version": "1.0.0",
+  "dependencies": {
+    "google-spreadsheet": "^3.3.0"
+  },
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build"
+  }
+}
