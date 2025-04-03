@@ -14,7 +14,7 @@ exports.handler = async function (event, context) {
       additionalProducts,
       finalMessage,
       confirmations,
-      products
+      products,
     } = JSON.parse(event.body);
 
     const doc = new GoogleSpreadsheet('152d_7IiRa9gdYj9KUxVD0mIKlYUefEFY8a6e6Erm4lY');
@@ -26,7 +26,10 @@ exports.handler = async function (event, context) {
 
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['response'];
+    await sheet.loadHeaderRow();
+    const existingHeaders = sheet.headerValues;
 
+    // 단일 행 구성
     const row = {
       Timestamp: new Date().toISOString(),
       Company: companyName,
@@ -37,17 +40,31 @@ exports.handler = async function (event, context) {
       Delivered: delivered,
       AdditionalProducts: additionalProducts,
       FinalMessage: finalMessage,
-      Confirmations: confirmations.join(', ')
+      Confirmations: confirmations.join(', '),
     };
 
-    // 제품 코드별 데이터 추가
-    products.forEach(({ code, available, price }) => {
-      row[`${code} Available`] = available;
-      row[`${code} Price`] = price;
-    });
+    // 제품 응답 처리 (객체로 변경된 구조 기대: { code, available, price })
+    if (Array.isArray(products)) {
+      products.forEach(({ code, available, price }) => {
+        const availableHeader = `${code} Available`;
+        const priceHeader = `${code} Price`;
+
+        // 중복 헤더 추가 방지
+        if (!existingHeaders.includes(availableHeader)) {
+          existingHeaders.push(availableHeader);
+        }
+        if (!existingHeaders.includes(priceHeader)) {
+          existingHeaders.push(priceHeader);
+        }
+
+        row[availableHeader] = available;
+        row[priceHeader] = price;
+      });
+
+      await sheet.setHeaderRow(existingHeaders);
+    }
 
     await sheet.addRow(row);
-
     console.log("✅ [submit] One row added successfully");
 
     return {
